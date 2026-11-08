@@ -1,4 +1,4 @@
-const CACHE='enzo-shell-v1.3.3';
+const CACHE='enzo-shell-v1.3.4';
 const FILES=['./','./index.html','./app.js','./push.js?v=1.2.0','./pull-refresh.js?v=1.0.3','./manifest.webmanifest','./vendor/supabase.min.js','./icons/favicon-32.png','./icons/apple-touch-icon.png','./icons/icon-192.png','./icons/icon-512.png','./icons/logo-original.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('enzo-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
