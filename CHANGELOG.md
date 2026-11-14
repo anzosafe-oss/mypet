@@ -1,3 +1,10 @@
+## v1.4.0
+
+- Acces administrat din MyAppsAdmin: invitații, retrimitere, retragere și reinvitare.
+- Activare cu parolă din linkul invitației.
+- Verificarea accesului la încărcare și revenire în aplicație; datele sunt păstrate la retragere.
+- Notificările nu mai sunt trimise conturilor cu acces retras.
+
 # MyPet
 
 ## 1.0.0

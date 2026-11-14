@@ -11,6 +11,7 @@ let query=db.from('mypet_push_subscriptions').select('*');if(uid)query=query.eq(
 const subs=checked(await query);let sent=0,failures=0;
 const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bucharest',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 for(const sub of subs){
+if(!checked(await db.rpc('mypet_access_allowed_for',{uid:sub.user_id})))continue;
 const targets=[7,1].map(days=>new Date(Date.parse(today+'T00:00:00Z')+days*86400000).toISOString().slice(0,10));
 const due=checked(await db.from('health_records').select('id,category,next_date,pet_id').eq('user_id',sub.user_id).in('next_date',targets).neq('category','Greutate'));
 if(!due.length)continue;
@@ -39,6 +40,7 @@ if(cron){const raw=checked(await db.from('mypet_push_config').select('keys').eq(
 const token=req.headers.get('authorization')?.replace(/^Bearer /i,'');if(!token)return reply({error:'Autentificare necesară.'},401);
 const auth=await db.auth.getUser(token);if(auth.error||!auth.data.user)return reply({error:'Autentificare necesară.'},401);
 const uid=auth.data.user.id,body=await req.json();
+if(body.action!=='unsubscribe'&&!checked(await db.rpc('mypet_access_allowed_for',{uid})))return reply({error:'Accesul la MyPet nu este activ.'},403);
 if(body.action==='config')return reply({publicKey:(await config()).publicKey});
 if(body.action==='subscribe'){if(!valid(body.subscription))return reply({error:'Abonament push invalid.'},400);
 const existing=checked(await db.from('mypet_push_subscriptions').select('user_id').eq('endpoint',body.subscription.endpoint).maybeSingle());
