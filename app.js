@@ -1,6 +1,6 @@
 'use strict';
 let invitationMode=new URLSearchParams(location.search).get('type')==='invite'||new URLSearchParams(location.hash.slice(1)).get('type')==='invite';
-const client = supabase.createClient('https://caajrctjlxehhofuwhag.supabase.co','sb_publishable_9MJ6QZaJ13nfuwYJyLZSmA_WAh0Rret',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const client = supabase.createClient('https://radskybbymadavveatzn.supabase.co','sb_publishable_VJh0qSiBA0OIcG7YqnLyjA_-YwiTlMT',{auth:{storageKey:'mypet-auth-v2',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const categories=['Vaccinuri','Vaccin Antirabic','Deparazitari Interne','Deparazitari Externe','Greutate'];
 const labels=['Vaccinuri','Vaccin antirabic','Deparazitări interne','Deparazitări externe','Greutate'];
 const form=document.querySelector('#form'),save=document.querySelector('#save'),statusEl=document.querySelector('#status');
