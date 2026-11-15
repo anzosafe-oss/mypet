@@ -23,7 +23,7 @@ const formHasChanges=()=>[...document.querySelectorAll('form')].some(f=>f.getCli
 document.addEventListener('touchstart',e=>{
 reset();
 if(!standalone()||blocked()||!atTop()||e.touches.length!==1||window.visualViewport?.scale>1)return;
-if(e.target.closest?.('input,textarea,select,button,a,label,dialog,[contenteditable="true"]'))return;
+if(e.target.closest?.('input,textarea,select,button,a,label,dialog,.app-header,.bottom-nav,[contenteditable="true"]'))return;
 // Preserve scrolling in any independently scrollable region.
 for(let node=e.target;node&&node!==document.body;node=node.parentElement){if(node.scrollHeight>node.clientHeight+2&&/auto|scroll/.test(getComputedStyle(node).overflowY))return}
 start={x:e.touches[0].clientX,y:e.touches[0].clientY};
@@ -49,3 +49,4 @@ setTimeout(()=>window.location.reload(),700);
 document.addEventListener('touchcancel',reset,{passive:true});
 document.addEventListener('visibilitychange',reset);
 })();
+

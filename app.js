@@ -6,6 +6,13 @@ const labels=['Vaccinuri','Vaccin antirabic','Deparazitări interne','Deparazit�
 const form=document.querySelector('#form'),save=document.querySelector('#save'),statusEl=document.querySelector('#status');
 const loginPanel=document.querySelector('#loginPanel'),appPanel=document.querySelector('#appPanel'),loginForm=document.querySelector('#loginForm');
 let pets=[],activePet=null,editingPet=null,pendingPetDelete=null,pendingPetId=null;
+function syncNavigation(){
+ const visible=!!user&&!invitationMode&&loginPanel.hidden;
+ document.querySelector('#bottomNav').hidden=!visible;
+ document.querySelector('#openSettings').setAttribute('aria-pressed',String(!document.querySelector('#settingsPanel').hidden));
+}
+const navigationObserver=new MutationObserver(syncNavigation);
+for(const panel of [loginPanel,document.querySelector('#settingsPanel')])navigationObserver.observe(panel,{attributes:true,attributeFilter:['hidden']});
 function rememberedCategory(){try{const c=localStorage.getItem('mypet-selected-category');return categories.includes(c)?c:categories[0]}catch{return categories[0]}}
 function rememberCategory(){try{localStorage.setItem('mypet-selected-category',selected)}catch{}}
 let selected=rememberedCategory(),records=[],editingId=null,pendingId=null,busy=false,user=null,loadSequence=0;
@@ -114,7 +121,7 @@ function renderProfile(){const p=currentPet();if(!p)return;document.querySelecto
 function renderPets(){const empty=!pets.length;document.querySelector('#noDogs').hidden=!empty;document.querySelector('.section-heading').hidden=empty;document.querySelector('.profile-panel').hidden=empty;document.querySelector('.tabs').hidden=empty;document.querySelector('#recordsArea').hidden=empty;const list=document.querySelector('#dogs');list.replaceChildren();pets.forEach(p=>{const button=document.createElement('button');button.type='button';button.className='dog-card';button.setAttribute('aria-pressed',String(p.id===activePet));button.disabled=busy;const name=document.createElement('strong'),breed=document.createElement('small');name.textContent=p.name;breed.textContent=p.breed||'Profil cățel';if(records.some(r=>r.pet_id===p.id&&needsAttention(r))){const dot=document.createElement('span');dot.className='category-alert';dot.setAttribute('aria-hidden','true');name.append(dot)}button.append(name,breed);button.onclick=()=>{if(busy)return;cancelEdit();activePet=p.id;renderPets();render()};list.append(button)});renderProfile()}
 function closePetDialogs(){for(const id of ['dogDialog','confirmDelete']){const d=document.querySelector('#'+id);if(d.open)d.close()}editingPet=null;pendingPetDelete=null;pendingPetId=null}
 async function openPet(edit){if(busy||!user||!await authorizeEdit())return;editingPet=edit?activePet:null;pendingPetId=null;const f=document.querySelector('#dogForm');f.reset();document.querySelector('#dogTitle').textContent=edit?'Modifică profilul':'Adaugă cățel';document.querySelector('#deleteDogArea').hidden=!edit;document.querySelector('#dogError').textContent='';if(edit){const p=currentPet();if(!p)return;for(const key of ['name','breed','birth','sex','breeder','chip'])f.elements[key].value=p[key]||''}document.querySelector('#dogDialog').showModal()}
-document.querySelector('#addDog').onclick=()=>openPet(false);document.querySelector('#addFirstDog').onclick=()=>openPet(false);document.querySelector('#editDog').onclick=()=>openPet(true);
+document.querySelector('#addDog').onclick=()=>{if(busy)return;document.querySelector('#settingsPanel').hidden=true;appPanel.hidden=false;openPet(false)};document.querySelector('#addFirstDog').onclick=()=>openPet(false);document.querySelector('#editDog').onclick=()=>openPet(true);
 document.querySelectorAll('[data-close="dogDialog"]').forEach(b=>b.onclick=()=>{if(!busy)document.querySelector('#dogDialog').close()});
 document.querySelector('#dogDialog').addEventListener('cancel',e=>{if(busy)e.preventDefault()});
 document.querySelector('#dogForm').oninput=()=>pendingPetId=null;
@@ -152,3 +159,4 @@ document.querySelector('#invitePasswordForm').onsubmit=async event=>{
 document.querySelector('#invitePasswordDialog').addEventListener('cancel',event=>event.preventDefault());
 setInterval(()=>{if(user&&!document.hidden&&!busy&&!invitationMode)load();},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user&&!busy&&!invitationMode)load();});
+

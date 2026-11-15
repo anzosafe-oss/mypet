@@ -1,3 +1,9 @@
+## v1.6.0
+
+- Header fix, separat de conținut, inclusiv în Setări și la reîncărcare.
+- Bară fixă jos: Setări, Adaugă cățel și LogOut.
+- Spațiu pentru zonele de siguranță iPhone și pentru indicatorul de refresh sub header.
+
 ## v1.4.0
 
 - Acces administrat din MyAppsAdmin: invitații, retrimitere, retragere și reinvitare.
