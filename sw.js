@@ -1,8 +1,8 @@
-const CACHE='enzo-shell-v1.6.0';
-const FILES=['./','./index.html','./app.js?v=1.6.0','./push.js?v=1.2.0','./pull-refresh.js?v=1.1.0','./manifest.webmanifest','./vendor/supabase.min.js','./icons/favicon-32.png','./icons/apple-touch-icon.png','./icons/icon-192.png','./icons/icon-512.png','./icons/logo-original.png'];
+const CACHE='enzo-shell-v1.7.0';
+const FILES=['./','./index.html','./app.js?v=1.7.0','./updates.js?v=1.7.0','./push.js?v=1.7.0','./pull-refresh.js?v=1.7.0','./manifest.webmanifest','./vendor/supabase.min.js','./icons/favicon-32.png','./icons/apple-touch-icon.png','./icons/icon-192.png','./icons/icon-512.png','./icons/logo-original.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('enzo-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin||!FILES.some(p=>new URL(p,self.registration.scope).href===u.href))return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request)))});
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.searchParams.has('update')||u.searchParams.has('check')||u.pathname.endsWith('/version.json'))return;if(e.request.method!=='GET'||u.origin!==self.location.origin||!FILES.some(p=>new URL(p,self.registration.scope).href===u.href))return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request)))});
 self.addEventListener('push',e=>e.waitUntil((async()=>{let d={};try{d=e.data?.json()||{}}catch{}
 await self.registration.showNotification(d.title||'MyPet · Memento',{body:d.body||'Deschide MyPet pentru detalii.',icon:new URL('icons/icon-192.png',self.registration.scope).href,tag:'mypet-due',data:{url:self.registration.scope}});
 if(self.navigator.setAppBadge&&d.badge>0)try{await self.navigator.setAppBadge(d.badge)}catch{}

@@ -54,11 +54,11 @@ async function deleteRecord(record){
  finally{setBusy(false)}
 }
 function setBusy(value){busy=value;document.querySelectorAll('#dogs button,#addDog,#editDog,#addFirstDog,#dogForm button,#dogForm input,#dogForm select,#confirmDelete button').forEach(el=>el.disabled=value);save.disabled=value||!user;document.querySelector('#logout').disabled=value;document.querySelector('#addRecord').disabled=value;nav.querySelectorAll('button').forEach(b=>b.disabled=value);form.querySelectorAll('input,textarea').forEach(el=>el.readOnly=value);render()}
-async function load(){if(!user||busy||invitationMode)return;const seq=++loadSequence,uid=user.id;setBusy(true);petMessage('Se încarcă datele…');try{
+async function load({quiet=false}={}){if(!user||busy||invitationMode)return false;const seq=++loadSequence,uid=user.id;setBusy(true);if(!quiet)petMessage('Se încarcă datele…');try{
  const visit=await client.rpc('mypet_visit');if(visit.error)throw Object.assign(new Error('Accesul la MyPet nu este activ sau nu poate fi verificat. Contactează administratorul.'),{accessDenied:true});
  const [p,r]=await Promise.all([client.from('pets').select('*').eq('user_id',uid).order('created_at'),client.from('health_records').select('*').eq('user_id',uid).order('date',{ascending:false}).order('created_at',{ascending:false})]);
- if(p.error)throw p.error;if(r.error)throw r.error;if(seq!==loadSequence||user?.id!==uid)return;loginPanel.hidden=true;appPanel.hidden=!document.querySelector('#settingsPanel').hidden;pets=p.data;records=r.data;if(!pets.some(p=>p.id===activePet))activePet=pets[0]?.id||null;renderPets();render();petMessage('');
- }catch(e){if(seq===loadSequence){if(e.accessDenied){pets=[];records=[];activePet=null;renderPets();render();appPanel.hidden=true;document.querySelector('#settingsPanel').hidden=true;loginPanel.hidden=false;document.querySelector('#loginStatus').textContent=e.message;}else petMessage('Datele nu au putut fi încărcate. Reîncarcă pagina pentru a reîncerca.',true)}}finally{setBusy(false)}}
+ if(p.error)throw p.error;if(r.error)throw r.error;if(seq!==loadSequence||user?.id!==uid)return;loginPanel.hidden=true;appPanel.hidden=!document.querySelector('#settingsPanel').hidden;pets=p.data;records=r.data;if(!pets.some(p=>p.id===activePet))activePet=pets[0]?.id||null;renderPets();render();petMessage('');window.MyPetUpdates?.restore();window.syncMyPetPush?.();return true;
+ }catch(e){if(seq===loadSequence){if(e.accessDenied){pets=[];records=[];activePet=null;renderPets();render();appPanel.hidden=true;document.querySelector('#settingsPanel').hidden=true;loginPanel.hidden=false;document.querySelector('#loginStatus').textContent=e.message;}else petMessage('Datele nu au putut fi încărcate. Reîncarcă pagina pentru a reîncerca.',true)}}finally{setBusy(false)}return false}
 
 form.addEventListener('input',()=>pendingId=null);
 form.addEventListener('submit',async e=>{e.preventDefault();if(!user||!activePet||busy||!form.reportValidity())return;const values=Object.fromEntries(new FormData(form)),weight=selected==='Greutate';if(!weight&&values.nextDate&&values.nextDate<values.date){message('Următoarea administrare nu poate fi înaintea datei înregistrării.',true);return}if(!weight&&!values.product.trim()){message('Completează produsul.',true);return}pendingId=pendingId||crypto.randomUUID();const id=editingId||pendingId,wasEdit=!!editingId;
@@ -133,7 +133,7 @@ document.querySelector('#confirmDeleteDog').onclick=async()=>{if(busy||!user||!p
 client.auth.onAuthStateChange((_event,session)=>sessionChanged(session));
 setCategory();render();
 client.auth.getSession().then(({data,error})=>{if(error){document.querySelector('#loginStatus').textContent='Conexiunea nu a putut fi verificată. Încearcă să te autentifici.';return}sessionChanged(data.session)});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
 
 
 function weightText(tag,value){const el=document.createElement(tag);el.textContent=value;return el}

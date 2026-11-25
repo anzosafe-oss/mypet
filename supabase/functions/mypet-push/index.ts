@@ -22,9 +22,9 @@ const windowEnd=new Date(Date.parse(today+'T00:00:00Z')+7*86400000).toISOString(
 const badge=checked(await db.from('health_records').select('id').eq('user_id',sub.user_id).neq('category','Greutate').gte('next_date',today).lte('next_date',windowEnd)).length;
 const body='Ai o administrare programată în curând. Deschide MyPet pentru detalii.';
 try{
-const request=webpush.generateRequestDetails(sub.subscription,JSON.stringify({title:'MyPet · Memento',body,badge}),{TTL:3600,urgency:'normal',topic:'mypet-due',vapidDetails:{subject:'mailto:anzo.safe@gmail.com',publicKey:keys.publicKey,privateKey:keys.privateKey}});
+const request=webpush.generateRequestDetails(sub.subscription,JSON.stringify({title:'MyPet · Memento',body,badge}),{TTL:86400,urgency:'normal',vapidDetails:{subject:'mailto:anzo.safe@gmail.com',publicKey:keys.publicKey,privateKey:keys.privateKey}});
 const res=await fetch(request.endpoint,{method:request.method,headers:request.headers,body:request.body,redirect:'error',signal:AbortSignal.timeout(15000)});
-if(!res.ok){if([404,410].includes(res.status))checked(await db.from('mypet_push_subscriptions').delete().eq('id',sub.id));throw Error('Push HTTP '+res.status)}
+if(!res.ok){if([404,410].includes(res.status))checked(await db.from('mypet_push_subscriptions').delete().eq('id',sub.id));let reason='';try{const detail=await res.json();if(typeof detail?.reason==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(detail.reason))reason=detail.reason}catch{}throw Error('Push HTTP '+res.status+(reason?' '+reason:''))}
 checked(await db.from('mypet_push_deliveries').update({sent_at:new Date().toISOString()}).in('id',claims.map((c:any)=>c.id)));sent++;
 }catch(err){failures++;checked(await db.from('mypet_push_deliveries').delete().in('id',claims.map((c:any)=>c.id)).is('sent_at',null));console.error('Push delivery failed',String(err))}
 }

@@ -1,3 +1,11 @@
+## v1.7.0
+
+- Refresh discret, sub header, fără reîncărcarea paginii când se schimbă doar datele.
+- Detectare versiune nouă, actualizare automată când este sigur și buton integrat în Setări.
+- Cățelul, categoria, Setările și poziția se păstrează la actualizare; formularele deschise sunt protejate.
+- Corectat respingerea Apple `BadWebPushTopic`; notificări independente de deschiderea aplicației, cu TTL de 24 ore.
+- Resincronizare dispozitiv push fără o nouă cerere de permisiune.
+
 ## v1.6.0
 
 - Header fix, separat de conținut, inclusiv în Setări și la reîncărcare.
